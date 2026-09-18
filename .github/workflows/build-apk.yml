@@ -19,41 +19,26 @@ jobs:
         uses: actions/setup-java@v6
         with:
           java-version: '17'
-          distribution: temurin
-          cache: gradle
+          distribution: 'temurin'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
       - name: Install Android SDK
         run: |
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-35"
-          sdkmanager "build-tools;35.0.0"
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Check project
-        run: |
-          echo "=== ROOT ==="
-          ls -la
-          echo "=== APP ==="
-          ls -la app || true
-          echo "=== GRADLE ==="
-          ls -la gradlew || true
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '8.9'
 
-      - name: Make Gradle executable
-        run: chmod +x gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Find APK
-        run: |
-          echo "=== APK FILES ==="
-          find . -type f -name "*.apk" -print
+      - name: Build APK
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AutoUsbTether-Vivo1816-debug
-          path: "**/build/outputs/apk/**/*.apk"
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
